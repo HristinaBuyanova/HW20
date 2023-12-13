@@ -1,100 +1,34 @@
 import Foundation
 
-struct MagicCards: Codable {
-    let cards: [ParametrCard]
+class ManagerCard {
+    let path: String
+    let host: String
+    let queryItem: [URLQueryItem]
+
+    init(path: String, host: String, queryItem: [URLQueryItem]) {
+        self.path = path
+        self.host = host
+        self.queryItem = queryItem
+    }
+
+    func createURL() -> URL? {
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = host
+        components.path = path
+        components.queryItems = queryItem
+        return components.url
+    }
 }
 
-struct ParametrCard: Codable {
-    let name: String
-    let type: String
-    let cmc: Int
-    let rarity: String
-    let cardSet: String
-    let artist: String
-    let id: String
-
-    enum CodingKeys: String, CodingKey {
-            case name, type, cmc, rarity
-            case cardSet = "set"
-            case artist, id
-        }
+let opt = ManagerCard(path: "/v1/cards", host: "api.magicthegathering.io", queryItem: queryItemOpt)
+if let urlOpt = opt.createURL()?.absoluteString {
+    getData(urlRequest: urlOpt)
 }
 
-
-func createURL(host: String,
-                       path: String,
-                       queryItem: [URLQueryItem]? = nil) -> URL? {
-    var components = URLComponents()
-    components.scheme = "https"
-    components.host = host
-    components.path = path
-    components.queryItems = queryItem
-    return components.url
+let blackLotus = ManagerCard(path: "/v1/cards", host: "api.magicthegathering.io", queryItem: queryItemBlackLotus)
+if let urlBlackLotus = blackLotus.createURL()?.absoluteString {
+    getData(urlRequest: urlBlackLotus)
 }
-
-
-func decodeData(_ data: Data) throws -> MagicCards {
-    let decoder = JSONDecoder()
-    let result = try decoder.decode(MagicCards.self, from: data)
-    return result
-}
-
-func getData(urlRequest: String) {
-    let urlRequest = URL(string: urlRequest)
-    guard let url = urlRequest else {
-        print("Неверный формат ссылки")
-        return }
-    URLSession.shared.dataTask(with: url) { data, responce, error in
-        if error != nil {
-            print("Error: \(String(describing: error))")
-        } else if let responce = responce as? HTTPURLResponse {
-            switch responce.statusCode {
-            case 200:
-                print("Успешно.")
-            default:
-                print("Код ответа: \(responce.statusCode)")
-            }
-
-            guard let data = data else { return }
-
-
-            do {
-                let result = try decodeData(data)
-                if !result.cards.isEmpty {
-                    for item in result.cards {
-                        printInfoAboutCard(card: item)
-                    }
-
-                }
-            } catch {
-                print("Ошибка декодирования.")
-            }
-
-        }
-    }.resume()
-}
-
-func printInfoAboutCard(card: ParametrCard) {
-    print("""
-Название карты: \(card.name)
-Тип карты: \(card.type)
-Преобразованная стоимость маны: \(card.cmc)
-Редкость карты: \(card.rarity)
-Набор: \(card.cardSet)
-Автор карты: \(card.artist)
-ID: \(card.artist)
-----------------------------------------------
-""")
-}
-
-
-let path = "/v1/cards"
-let host = "api.magicthegathering.io"
-let queryItemOpt = [URLQueryItem(name: "name", value: "Opt")]
-let queryItemBlackLotus = [URLQueryItem(name: "name", value: "Black Lotus")]
-
-let urlMy = createURL(host: host, path: path, queryItem: queryItemBlackLotus)?.absoluteString
-
-getData(urlRequest: urlMy ?? "https://api.magicthegathering.io/v1/cards")
 
 
