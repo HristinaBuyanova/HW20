@@ -62,16 +62,7 @@ func getData(urlRequest: String) {
                 let result = try decodeData(data)
                 if !result.cards.isEmpty {
                     for item in result.cards {
-                        print("""
-    Название карты: \(item.name)
-    Тип карты: \(item.type)
-    Преобразованная стоимость маны: \(item.cmc)
-    Редкость карты: \(item.rarity)
-    Набор: \(item.cardSet)
-    Автор карты: \(item.artist)
-    ID: \(item.artist)
-    ----------------------------------------------
-    """)
+                        printInfoAboutCard(card: item)
                     }
 
                 }
@@ -83,13 +74,26 @@ func getData(urlRequest: String) {
     }.resume()
 }
 
+func printInfoAboutCard(card: ParametrCard) {
+    print("""
+Название карты: \(card.name)
+Тип карты: \(card.type)
+Преобразованная стоимость маны: \(card.cmc)
+Редкость карты: \(card.rarity)
+Набор: \(card.cardSet)
+Автор карты: \(card.artist)
+ID: \(card.artist)
+----------------------------------------------
+""")
+}
+
 
 let path = "/v1/cards"
 let host = "api.magicthegathering.io"
 let queryItemOpt = [URLQueryItem(name: "name", value: "Opt")]
 let queryItemBlackLotus = [URLQueryItem(name: "name", value: "Black Lotus")]
 
-let urlMy = createURL(host: host, path: path, queryItem: queryItemOpt)?.absoluteString
+let urlMy = createURL(host: host, path: path, queryItem: queryItemBlackLotus)?.absoluteString
 
 getData(urlRequest: urlMy ?? "https://api.magicthegathering.io/v1/cards")
 
